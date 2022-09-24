@@ -1,11 +1,9 @@
 import express from "express";
-
 import { Server as HttpServer } from "http";
 import { Server as Socket } from "socket.io";
-
 import ContenedorSQL from "./contenedores/ContenedorSQL.js";
-
 import config from "./config.js";
+import * as fakeProdApi from "./api/fakeProds.js";
 
 //--------------------------------------------
 // instancio servidor, socket y api
@@ -50,6 +48,14 @@ io.on("connection", async (socket) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
+
+// agrego una ruta get
+
+
+app.get("/api/productos-test", (req, res) => {
+  const fakeProds = fakeProdApi.generateMany(5);
+  res.send(fakeProds);
+});
 
 //--------------------------------------------
 // inicio el servidor
