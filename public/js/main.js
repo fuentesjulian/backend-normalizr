@@ -58,9 +58,9 @@ formPublicarMensaje.addEventListener("submit", (e) => {
       apellido: lastname.value,
       edad: age.value,
       alias: alias.value,
-      avatar: avatar.value,
+      avatar: avatar.value
     },
-    text: inputMensaje.value,
+    text: inputMensaje.value
   };
   socket.emit("newMessage", message);
   //Armar el objeto de mensaje y luego emitir mensaje al evento nuevoMensaje con sockets
@@ -68,10 +68,16 @@ formPublicarMensaje.addEventListener("submit", (e) => {
   inputMensaje.focus();
 });
 
-socket.on("mensajes", async (mensajes) => {
+socket.on("mensajes", async (normalizedMsgs) => {
+  const initSize = JSON.stringify(normalizedMsgs).length;
+  const denormalizedMensajes = denormalizeData(normalizedMsgs);
+
+  const finalSize = JSON.stringify(denormalizedMensajes).length;
+  const compresion = Math.round((initSize / finalSize) * 100);
+  document.getElementById("compresion-info").innerText = compresion;
   //generar el html y colocarlo en el tag productos llamando al funcion makeHtmlTable
   // en este caso cree otra funcion para hacer los mensajes con el formato que pide la consigna
-  const html = await makeHtmlMessages(mensajes);
+  const html = await makeHtmlMessages(denormalizedMensajes.mensajes);
   // cargo ese html generado en el div mensajes
   document.getElementById("mensajes").innerHTML = html;
 });
@@ -99,3 +105,12 @@ document.addEventListener("input", () => {
     }
   }
 });
+
+const denormalizeData = (normalizedData) => {
+  const schema = normalizr.schema;
+  const author = new schema.Entity("author", { idAttribute: "email" });
+  const mensaje = new schema.Entity("mensaje", { author: author });
+  const mensajes = new schema.Entity("mensajes", { mensajes: [mensaje] });
+  const denormalize = normalizr.denormalize;
+  return denormalize(normalizedData.result, mensajes, normalizedData.entities);
+};
