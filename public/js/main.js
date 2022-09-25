@@ -37,8 +37,14 @@ async function makeHtmlTable(productos) {
 
 //-------------------------------------------------------------------------------------
 
-const inputUsername = document.getElementById("inputUsername");
+const username = document.getElementById("username");
+const firstname = document.getElementById("firstname");
+const lastname = document.getElementById("lastname");
+const age = document.getElementById("age");
+const alias = document.getElementById("alias");
+const avatar = document.getElementById("avatar");
 const inputMensaje = document.getElementById("inputMensaje");
+
 const btnEnviar = document.getElementById("btnEnviar");
 
 const formPublicarMensaje = document.getElementById("formPublicarMensaje");
@@ -46,7 +52,14 @@ formPublicarMensaje.addEventListener("submit", (e) => {
   e.preventDefault();
   // creo el objeto y lo envio
   const message = {
-    email: inputUsername.value,
+    author: {
+      id: username.value,
+      nombre: firstname.value,
+      apellido: lastname.value,
+      edad: age.value,
+      alias: alias.value,
+      avatar: avatar.value,
+    },
     text: inputMensaje.value,
   };
   socket.emit("newMessage", message);
@@ -73,14 +86,16 @@ async function makeHtmlMessages(mensajes) {
       return html;
     });
 }
-inputUsername.addEventListener("input", () => {
-  const hayEmail = inputUsername.value.length;
-  const hayTexto = inputMensaje.value.length;
-  inputMensaje.disabled = !hayEmail;
-  btnEnviar.disabled = !hayEmail || !hayTexto;
-});
-
-inputMensaje.addEventListener("input", () => {
-  const hayTexto = inputMensaje.value.length;
-  btnEnviar.disabled = !hayTexto;
+document.addEventListener("input", () => {
+  if (!username.value || !firstname.value || !lastname.value || !age.value || !alias.value || !avatar.value) {
+    inputMensaje.disabled = true;
+    btnEnviar.disabled = true;
+  } else {
+    inputMensaje.disabled = false;
+    if (!inputMensaje.value) {
+      btnEnviar.disabled = true;
+    } else {
+      btnEnviar.disabled = false;
+    }
+  }
 });
